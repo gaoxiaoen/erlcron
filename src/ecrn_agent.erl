@@ -246,14 +246,23 @@ until_next_time(State, {{monthly, DoM, Period}, _What}) ->
 %% period is to occur during the day.
 -spec until_next_daytime(state(), erlcron:period()) -> erlcron:seconds().
 until_next_daytime(State, Period) ->
-    StartTime = first_time(Period),
-    EndTime = last_time(Period),
+   %% StartTime = first_time(Period),
+    %% EndTime = last_time(Period),
+    {StartTime,EndTime} = calc_first_last_time(Period),
     case current_time(State) of
         T when T > EndTime ->
             until_tomorrow(State, StartTime);
         T ->
             next_time(Period, T) - T
     end.
+
+%% 计算超时的最后一个时间和最开始的时间
+calc_first_last_time(Period) ->
+    Time = lists:sort(resolve_period(Period)),
+    LastTime = hd(lists:reverse(Time)),
+    FirstTime = hd(Time),
+    {FirstTime,LastTime}.
+
 
 %% @doc Calculates the last time in a given period.
 -spec last_time(erlcron:period()) -> erlcron:seconds().
